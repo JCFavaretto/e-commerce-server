@@ -1,7 +1,8 @@
 const bcrypt = require("bcrypt");
+const { createAccessToken, createRefreshToken } = require("../services/jwt");
 const User = require("../models/user");
 
-async function signUp(req, res) {
+function signUp(req, res) {
   const { name, lastName, email, password, repeatPassword } = req.body;
 
   if (!password) {
@@ -21,7 +22,7 @@ async function signUp(req, res) {
   const user = new User({
     name,
     lastName,
-    email,
+    email: email.toLowerCase(),
     password: bcrypt.hashSync(password, 10),
   });
 
@@ -29,8 +30,7 @@ async function signUp(req, res) {
     if (err) {
       return res.status(400).send({
         ok: false,
-        message: "Error en la base de datos",
-        err,
+        message: err.message,
       });
     } else {
       if (!userDB) {
@@ -45,4 +45,53 @@ async function signUp(req, res) {
   });
 }
 
-module.exports = { signUp };
+function signIn(req, res) {
+  const params = req.body;
+  const email = params.email.toLowerCase();
+  const password = params.password;
+
+  User.findOne({ email }, (err, userDB) => {
+    if (err) {
+      return res.status(500).send({
+        ok: false,
+        message: "Error del servidor",
+      });
+    } else {
+      if (!userDB) {
+        return res.status(404).send({
+          ok: false,
+          message: "Usuario no encontrado",
+        });
+      } else {
+        bcrypt.compare(password, userDB.password, (err, check) => {
+          if (err) {
+            return res.status(500).send({
+              ok: false,
+              message: "Error del servidor",
+            });
+          }
+          if (!check) {
+            return res.status(500).send({
+              ok: false,
+              message: "La contraseña es incorrecta",
+            });
+          } else {
+            if (!userDB.active) {
+              return res.status(200).send({
+                ok: false,
+                message: "Usuario no activo",
+              });
+            } else {
+              return res.status(200).send({
+                accessToken: createAccessToken(userDB),
+                refreshToken: createRefreshToken(userDB),
+              });
+            }
+          }
+        });
+      }
+    }
+  });
+}
+
+module.exports = { signUp, signIn };

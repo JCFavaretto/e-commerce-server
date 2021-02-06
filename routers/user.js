@@ -4,4 +4,6 @@ const app = express();
 
 app.post("/sign-up", UserController.signUp);
 
+app.post("/sign-in", UserController.signIn);
+
 module.exports = app;

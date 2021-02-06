@@ -30,4 +30,14 @@ const UserSchema = Schema({
   },
 });
 
+UserSchema.methods.toJSON = function () {
+  let user = this;
+  let userObject = user.toObject();
+  delete userObject.password;
+
+  return userObject;
+};
+
+UserSchema.plugin(uniqueValidator, { message: "Ese {PATH} ya existe." });
+
 module.exports = mongoose.model("User", UserSchema);

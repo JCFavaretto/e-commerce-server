@@ -17,5 +17,9 @@ if (process.env.NODE_ENV === "dev") {
 } else {
   urlDB = process.env.MONGO_URI;
 }
-
 process.env.URLDB = urlDB;
+
+//-------------------------
+// Secret key token
+//--------------------------
+process.env.SEED = process.env.SEED || "este-es-el-seed-de-desarrollo";
