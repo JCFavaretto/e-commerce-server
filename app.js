@@ -9,7 +9,7 @@ app.use(bodyParser.json());
 // Configure Header HTTP
 // .........
 
-// Router Basic
+// Routes
 app.use(require("./routers"));
 
 module.exports = app;
