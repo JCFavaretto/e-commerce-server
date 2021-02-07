@@ -95,4 +95,37 @@ function signIn(req, res) {
   });
 }
 
-module.exports = { signUp, signIn };
+function getUsers(req, res) {
+  console.log("users");
+
+  User.find().exec((err, users) => {
+    if (err) {
+      return res.status(400).send({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+      });
+    }
+
+    if (!users) {
+      return res
+        .status(404)
+        .send({ ok: false, message: "No se ha encontrado ningun usuarios" });
+    }
+
+    User.countDocuments((err, totalUsuarios) => {
+      if (err) {
+        return res.status(400).send({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+        });
+      }
+      res.send({
+        ok: true,
+        totalUsuarios,
+        users,
+      });
+    });
+  });
+}
+
+module.exports = { signUp, signIn, getUsers };
