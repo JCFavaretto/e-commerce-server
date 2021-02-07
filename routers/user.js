@@ -10,4 +10,6 @@ app.post("/sign-in", UserController.signIn);
 
 app.get("/users", [md_auth.ensureAuth], UserController.getUsers);
 
+app.get("/users-active", [md_auth.ensureAuth], UserController.getActiveUsers);
+
 module.exports = app;

@@ -2,13 +2,13 @@ const jwt = require("jwt-simple");
 const moment = require("moment");
 
 exports.ensureAuth = (req, res, next) => {
-  if (!req.headers.autorization) {
+  if (!req.headers.authorization) {
     return res.status(403).send({
       ok: false,
       message: "La petición no tiene cabecera de Autenticación",
     });
   }
-  const token = req.headers.autorization.replace(/['"']+/g, "");
+  const token = req.headers.authorization.replace(/['"']+/g, "");
 
   try {
     var payload = jwt.decode(token, process.env.SEED);

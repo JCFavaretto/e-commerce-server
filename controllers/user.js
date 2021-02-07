@@ -96,8 +96,6 @@ function signIn(req, res) {
 }
 
 function getUsers(req, res) {
-  console.log("users");
-
   User.find().exec((err, users) => {
     if (err) {
       return res.status(400).send({
@@ -128,4 +126,37 @@ function getUsers(req, res) {
   });
 }
 
-module.exports = { signUp, signIn, getUsers };
+function getActiveUsers(req, res) {
+  const query = req.query;
+
+  User.find({ active: query.active }).exec((err, users) => {
+    if (err) {
+      return res.status(400).send({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+      });
+    }
+
+    if (!users) {
+      return res
+        .status(404)
+        .send({ ok: false, message: "No se ha encontrado ningun usuarios" });
+    }
+
+    User.countDocuments({ active: query.active }, (err, totalUsuarios) => {
+      if (err) {
+        return res.status(400).send({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+        });
+      }
+      res.send({
+        ok: true,
+        totalUsuarios,
+        users,
+      });
+    });
+  });
+}
+
+module.exports = { signUp, signIn, getUsers, getActiveUsers };
