@@ -1,3 +1,5 @@
+const fs = require("fs");
+const path = require("path");
 const bcrypt = require("bcrypt");
 const { createAccessToken, createRefreshToken } = require("../services/jwt");
 const User = require("../models/user");
@@ -98,7 +100,7 @@ function signIn(req, res) {
 function getUsers(req, res) {
   User.find().exec((err, users) => {
     if (err) {
-      return res.status(400).send({
+      return res.status(500).send({
         ok: false,
         message: "Error en la base de datos. Intente mas tarde.",
       });
@@ -131,7 +133,7 @@ function getActiveUsers(req, res) {
 
   User.find({ active: query.active }).exec((err, users) => {
     if (err) {
-      return res.status(400).send({
+      return res.status(500).send({
         ok: false,
         message: "Error en la base de datos. Intente mas tarde.",
       });
@@ -159,4 +161,60 @@ function getActiveUsers(req, res) {
   });
 }
 
-module.exports = { signUp, signIn, getUsers, getActiveUsers };
+function uploadAvatar(req, res) {
+  const { id } = req.params;
+
+  if (!req.files || Object.keys(req.files).length === 0) {
+    return res.status(400).json({
+      ok: false,
+      err: {
+        message: "No se subio ningun archivo",
+      },
+    });
+  }
+
+  User.findById({ _id: id }, (err, userDB) => {
+    if (err) {
+      return res.status(500).send({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+      });
+    }
+    if (!userDB) {
+      return res
+        .status(404)
+        .send({ ok: false, message: "No se ha encontrado ningun usuario" });
+    }
+
+    let extSpli = req.files.avatar.path.split(".");
+    let ext = extSpli[extSpli.length - 1];
+
+    let extensionesValidas = ["png", "jpg", "jpeg"];
+    if (extensionesValidas.indexOf(ext) < 0) {
+      return res.status(400).send({
+        ok: false,
+        message:
+          "Las extensiones permitidas son: " + extensionesValidas.join(", "),
+      });
+    }
+    // Cambiar nombre de los archivos
+    let name = `${id}.${ext}`;
+
+    userDB.avatar = name;
+
+    User.findByIdAndUpdate(id, userDB, { new: true }, (err, userUpdated) => {
+      if (err) {
+        return res.status(500).send({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+        });
+      }
+      res.send({
+        ok: true,
+        user: userUpdated,
+      });
+    });
+  });
+}
+
+module.exports = { signUp, signIn, getUsers, getActiveUsers, uploadAvatar };

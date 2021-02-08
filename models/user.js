@@ -28,6 +28,10 @@ const UserSchema = Schema({
     type: Boolean,
     default: true,
   },
+  avatar: {
+    type: String,
+    required: false,
+  },
 });
 
 UserSchema.methods.toJSON = function () {
