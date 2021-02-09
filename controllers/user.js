@@ -225,6 +225,30 @@ function changeStatus(req, res) {
   });
 }
 
+function deleteUser(req, res) {
+  const id = req.params.id;
+
+  User.findByIdAndRemove(id, (err, userDB) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
+      });
+    }
+    if (!userDB) {
+      return res.status(404).json({
+        ok: false,
+        message: "No se encontro el usuario.",
+      });
+    }
+    res.json({
+      ok: true,
+      message: "Usuario eliminado.",
+    });
+  });
+}
+
 module.exports = {
   signUp,
   signIn,
@@ -232,4 +256,5 @@ module.exports = {
   getActiveUsers,
   updateUsers,
   changeStatus,
+  deleteUser,
 };

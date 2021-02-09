@@ -20,4 +20,6 @@ app.put(
   UserController.changeStatus
 );
 
+app.delete("/delete-user/:id", [md_auth.ensureAuth], UserController.deleteUser);
+
 module.exports = app;
