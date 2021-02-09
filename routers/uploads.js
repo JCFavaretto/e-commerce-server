@@ -13,10 +13,6 @@ app.put(
   UploadsController.uploadImage
 );
 
-app.get(
-  "/imagen/:tipo/:img",
-  [md_auth.ensureAuth],
-  UploadsController.getImagen
-);
+app.get("/imagen/:tipo/:img", UploadsController.getImagen);
 
 module.exports = app;

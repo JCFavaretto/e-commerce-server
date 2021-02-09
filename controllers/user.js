@@ -13,7 +13,7 @@ function signUp(req, res) {
   }
 
   if (password !== repeatPassword) {
-    return res.status(406).json({
+    return res.status(400).json({
       ok: false,
       message: "Las contraseñas no coinciden",
     });
@@ -166,7 +166,13 @@ function getActiveUsers(req, res) {
 
 function updateUsers(req, res) {
   const id = req.params.id;
-  const user = req.body;
+  var user = req.body;
+
+  user.email = req.body.email.toLowerCase();
+
+  if (user.password) {
+    user.password = bcrypt.hashSync(user.password, 10);
+  }
 
   User.findByIdAndUpdate(
     id,
@@ -194,10 +200,36 @@ function updateUsers(req, res) {
   );
 }
 
+function changeStatus(req, res) {
+  const id = req.params.id;
+  const active = req.body.active;
+
+  User.findByIdAndUpdate(id, { active }, { new: true }, (err, userDB) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
+      });
+    }
+    if (!userDB) {
+      return res.status(404).json({
+        ok: false,
+        message: "No se encontro el usuario.",
+      });
+    }
+    res.json({
+      ok: true,
+      user: userDB,
+    });
+  });
+}
+
 module.exports = {
   signUp,
   signIn,
   getUsers,
   getActiveUsers,
   updateUsers,
+  changeStatus,
 };
