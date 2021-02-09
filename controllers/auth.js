@@ -17,7 +17,7 @@ function refreshAccessToken(req, res) {
   const isTokenExpired = willExpireToken(refreshToken);
 
   if (isTokenExpired) {
-    return res.status(404).send({
+    return res.status(404).json({
       ok: false,
       message: "El refreshToken ha expirado",
     });
@@ -27,18 +27,18 @@ function refreshAccessToken(req, res) {
 
   User.findById(id).exec((err, userDB) => {
     if (err) {
-      return res.status(400).send({
+      return res.status(400).json({
         ok: false,
         message: err.message,
       });
     }
     if (!userDB) {
-      return res.status(404).send({
+      return res.status(404).json({
         ok: false,
         message: "No se encontro el usuario",
       });
     }
-    res.status(200).send({
+    res.status(200).json({
       ok: true,
       accessToken: jwt.createAccessToken(userDB),
       refreshToken: refreshToken,

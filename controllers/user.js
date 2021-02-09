@@ -1,5 +1,3 @@
-const fs = require("fs");
-const path = require("path");
 const bcrypt = require("bcrypt");
 const { createAccessToken, createRefreshToken } = require("../services/jwt");
 const User = require("../models/user");
@@ -8,14 +6,14 @@ function signUp(req, res) {
   const { name, lastName, email, password, repeatPassword } = req.body;
 
   if (!password) {
-    return res.status(404).send({
+    return res.status(404).json({
       ok: false,
       message: "Debe ingresar una contraseña",
     });
   }
 
   if (password !== repeatPassword) {
-    return res.status(406).send({
+    return res.status(406).json({
       ok: false,
       message: "Las contraseñas no coinciden",
     });
@@ -30,18 +28,19 @@ function signUp(req, res) {
 
   user.save((err, userDB) => {
     if (err) {
-      return res.status(400).send({
+      return res.status(400).json({
         ok: false,
-        message: err.message,
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
       });
     } else {
       if (!userDB) {
-        res.status(404).send({
+        res.status(404).json({
           ok: false,
           message: "Error al crear el usuario",
         });
       } else {
-        res.status(200).send({ ok: true, user: userDB });
+        res.status(200).json({ ok: true, user: userDB });
       }
     }
   });
@@ -54,37 +53,39 @@ function signIn(req, res) {
 
   User.findOne({ email }, (err, userDB) => {
     if (err) {
-      return res.status(500).send({
+      return res.status(500).json({
         ok: false,
-        message: "Error del servidor",
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
       });
     } else {
       if (!userDB) {
-        return res.status(404).send({
+        return res.status(404).json({
           ok: false,
           message: "Usuario no encontrado",
         });
       } else {
         bcrypt.compare(password, userDB.password, (err, check) => {
           if (err) {
-            return res.status(500).send({
+            return res.status(500).json({
               ok: false,
-              message: "Error del servidor",
+              message: "Error en la base de datos. Intente mas tarde.",
+              err,
             });
           }
           if (!check) {
-            return res.status(404).send({
+            return res.status(404).json({
               ok: false,
               message: "La contraseña es incorrecta",
             });
           } else {
             if (!userDB.active) {
-              return res.status(200).send({
+              return res.status(200).json({
                 ok: false,
                 message: "Usuario no activo",
               });
             } else {
-              return res.status(200).send({
+              return res.status(200).json({
                 ok: true,
                 accessToken: createAccessToken(userDB),
                 refreshToken: createRefreshToken(userDB),
@@ -100,26 +101,28 @@ function signIn(req, res) {
 function getUsers(req, res) {
   User.find().exec((err, users) => {
     if (err) {
-      return res.status(500).send({
+      return res.status(500).json({
         ok: false,
         message: "Error en la base de datos. Intente mas tarde.",
+        err,
       });
     }
 
     if (!users) {
       return res
         .status(404)
-        .send({ ok: false, message: "No se ha encontrado ningun usuarios" });
+        .json({ ok: false, message: "No se ha encontrado ningun usuarios" });
     }
 
     User.countDocuments((err, totalUsuarios) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(400).json({
           ok: false,
           message: "Error en la base de datos. Intente mas tarde.",
+          err,
         });
       }
-      res.send({
+      res.json({
         ok: true,
         totalUsuarios,
         users,
@@ -133,7 +136,7 @@ function getActiveUsers(req, res) {
 
   User.find({ active: query.active }).exec((err, users) => {
     if (err) {
-      return res.status(500).send({
+      return res.status(500).json({
         ok: false,
         message: "Error en la base de datos. Intente mas tarde.",
       });
@@ -142,17 +145,17 @@ function getActiveUsers(req, res) {
     if (!users) {
       return res
         .status(404)
-        .send({ ok: false, message: "No se ha encontrado ningun usuarios" });
+        .json({ ok: false, message: "No se ha encontrado ningun usuarios" });
     }
 
     User.countDocuments({ active: query.active }, (err, totalUsuarios) => {
       if (err) {
-        return res.status(400).send({
+        return res.status(400).json({
           ok: false,
           message: "Error en la base de datos. Intente mas tarde.",
         });
       }
-      res.send({
+      res.json({
         ok: true,
         totalUsuarios,
         users,
@@ -161,60 +164,40 @@ function getActiveUsers(req, res) {
   });
 }
 
-function uploadAvatar(req, res) {
-  const { id } = req.params;
+function updateUsers(req, res) {
+  const id = req.params.id;
+  const user = req.body;
 
-  if (!req.files || Object.keys(req.files).length === 0) {
-    return res.status(400).json({
-      ok: false,
-      err: {
-        message: "No se subio ningun archivo",
-      },
-    });
-  }
-
-  User.findById({ _id: id }, (err, userDB) => {
-    if (err) {
-      return res.status(500).send({
-        ok: false,
-        message: "Error en la base de datos. Intente mas tarde.",
-      });
-    }
-    if (!userDB) {
-      return res
-        .status(404)
-        .send({ ok: false, message: "No se ha encontrado ningun usuario" });
-    }
-
-    let extSpli = req.files.avatar.path.split(".");
-    let ext = extSpli[extSpli.length - 1];
-
-    let extensionesValidas = ["png", "jpg", "jpeg"];
-    if (extensionesValidas.indexOf(ext) < 0) {
-      return res.status(400).send({
-        ok: false,
-        message:
-          "Las extensiones permitidas son: " + extensionesValidas.join(", "),
-      });
-    }
-    // Cambiar nombre de los archivos
-    let name = `${id}.${ext}`;
-
-    userDB.avatar = name;
-
-    User.findByIdAndUpdate(id, userDB, { new: true }, (err, userUpdated) => {
+  User.findByIdAndUpdate(
+    id,
+    user,
+    { new: true, runValidators: true, context: "query" },
+    (err, userDB) => {
       if (err) {
-        return res.status(500).send({
+        return res.status(500).json({
           ok: false,
           message: "Error en la base de datos. Intente mas tarde.",
+          err,
         });
       }
-      res.send({
+      if (!userDB) {
+        return res.status(404).json({
+          ok: false,
+          message: "No se encontro el usuario.",
+        });
+      }
+      res.json({
         ok: true,
-        user: userUpdated,
+        user: userDB,
       });
-    });
-  });
+    }
+  );
 }
 
-module.exports = { signUp, signIn, getUsers, getActiveUsers, uploadAvatar };
+module.exports = {
+  signUp,
+  signIn,
+  getUsers,
+  getActiveUsers,
+  updateUsers,
+};

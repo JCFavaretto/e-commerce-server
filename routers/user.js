@@ -1,9 +1,6 @@
 const express = require("express");
 const UserController = require("../controllers/user");
-const multiPart = require("connect-multiparty");
-
 const md_auth = require("../middleware/authenticated");
-const md_upload_avatar = multiPart({ uploadDir: "./uploads/avatar" });
 
 const app = express();
 
@@ -15,10 +12,6 @@ app.get("/users", [md_auth.ensureAuth], UserController.getUsers);
 
 app.get("/users-active", [md_auth.ensureAuth], UserController.getActiveUsers);
 
-app.put(
-  "/upload-avatar/:id",
-  [md_auth.ensureAuth, md_upload_avatar],
-  UserController.uploadAvatar
-);
+app.put("/update-user/:id", [md_auth.ensureAuth], UserController.updateUsers);
 
 module.exports = app;
