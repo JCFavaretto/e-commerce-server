@@ -145,10 +145,63 @@ function obtenerUnProducto(req, res) {
   });
 }
 
+function obtenerProductosActivos(req, res) {
+  const query = req.query;
+
+  Product.find({ active: query.active }).exec((err, productosDB) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
+      });
+    }
+    Product.countDocuments({ active: query.active }, (err, conteo) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+          err,
+        });
+      }
+      res.json({
+        ok: true,
+        conteo,
+        productos: productosDB,
+      });
+    });
+  });
+}
+
+function eliminarProducto(req, res) {
+  const id = req.params.id;
+  Product.findByIdAndRemove(id, (err, producto) => {
+    if (err) {
+      return res.status(500).json({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
+      });
+    }
+    if (!producto) {
+      return res.status(404).json({
+        ok: false,
+        message: "No se encontro el producto.",
+      });
+    }
+    res.json({
+      ok: true,
+      message: "Producto Eliminado.",
+    });
+  });
+}
+
 module.exports = {
   editarProducto,
   crearProducto,
   obtenerProductos,
   obtenerTodosProductos,
   obtenerUnProducto,
+  obtenerProductosActivos,
+  eliminarProducto,
 };

@@ -26,4 +26,16 @@ app.get(
 
 app.get("/producto/:id", ProductController.obtenerUnProducto);
 
+app.get(
+  "/productos-activos",
+  [md_auth.ensureAuth, md_auth.ensureAdminRole],
+  ProductController.obtenerProductosActivos
+);
+
+app.delete(
+  "/eliminar-producto/:id",
+  [md_auth.ensureAuth, md_auth.ensureAdminRole],
+  ProductController.eliminarProducto
+);
+
 module.exports = app;

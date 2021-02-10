@@ -19,6 +19,7 @@ var productoSchema = new Schema({
   },
   oferta: { type: Boolean, default: false },
   vendidos: { type: Number, default: 0 },
+  active: { type: Boolean, default: true },
   stock: { type: Number, required: true },
   categoria: { type: String, required: true },
 });
