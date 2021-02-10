@@ -16,6 +16,12 @@ app.put(
   ProductController.editarProducto
 );
 
+app.put(
+  "/cambiar-estado-producto/:id",
+  [md_auth.ensureAuth, md_auth.ensureAdminRole],
+  ProductController.changeStatus
+);
+
 app.get("/obtener-productos", ProductController.obtenerProductos);
 
 app.get(

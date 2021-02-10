@@ -69,6 +69,36 @@ function editarProducto(req, res) {
   );
 }
 
+function changeStatus(req, res) {
+  const id = req.params.id;
+  const active = req.body.active;
+
+  Product.findByIdAndUpdate(
+    id,
+    { active },
+    { new: true },
+    (err, productoDB) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+          err,
+        });
+      }
+      if (!productoDB) {
+        return res.status(404).json({
+          ok: false,
+          message: "No se encontro el producto.",
+        });
+      }
+      res.json({
+        ok: true,
+        user: productoDB,
+      });
+    }
+  );
+}
+
 function obtenerProductos(req, res) {
   Product.find({ stock: { $gt: 0 } }).exec((err, productosDB) => {
     if (err) {
@@ -197,8 +227,9 @@ function eliminarProducto(req, res) {
 }
 
 module.exports = {
-  editarProducto,
   crearProducto,
+  editarProducto,
+  changeStatus,
   obtenerProductos,
   obtenerTodosProductos,
   obtenerUnProducto,
