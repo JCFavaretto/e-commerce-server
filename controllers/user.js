@@ -4,6 +4,24 @@ const User = require("../models/user");
 
 function signUp(req, res) {
   const { name, lastName, email, password, repeatPassword } = req.body;
+  if (!name) {
+    return res.status(404).json({
+      ok: false,
+      message: "Debe ingresar el nombre",
+    });
+  }
+  if (!lastName) {
+    return res.status(404).json({
+      ok: false,
+      message: "Debe ingresar un apellido",
+    });
+  }
+  if (!email) {
+    return res.status(404).json({
+      ok: false,
+      message: "Debe ingresar un email",
+    });
+  }
 
   if (!password) {
     return res.status(404).json({
@@ -28,7 +46,7 @@ function signUp(req, res) {
 
   user.save((err, userDB) => {
     if (err) {
-      return res.status(400).json({
+      return res.status(500).json({
         ok: false,
         message: "Error en la base de datos. Intente mas tarde.",
         err,

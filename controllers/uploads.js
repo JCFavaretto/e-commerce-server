@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const User = require("../models/user");
+const Product = require("../models/products");
 
 function uploadImage(req, res) {
   let tipo = req.params.tipo;
@@ -92,6 +93,54 @@ function imagenUsuario(id, res, nombreArchivo) {
       res.json({
         ok: true,
         user: usuarioBD,
+        img: nombreArchivo,
+      });
+    });
+  });
+}
+
+function imagenProducto(id, res, nombreArchivo) {
+  Product.findById(id, (err, producto) => {
+    if (err) {
+      borrarArchivo(nombreArchivo, "productos");
+      return res.status(500).json({
+        ok: false,
+        message: "Error en la base de datos. Intente mas tarde.",
+        err,
+      });
+    }
+
+    if (!producto) {
+      borrarArchivo(nombreArchivo, "productos");
+      return res.status(400).json({
+        ok: false,
+        message: "El producto no existe en la base de datos",
+      });
+    }
+
+    borrarArchivo(producto.img, "productos");
+
+    producto.img = nombreArchivo;
+
+    producto.save((err, productoBD) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+          err,
+        });
+      }
+      if (!productoDB) {
+        borrarArchivo(nombreArchivo, "productos");
+        return res.status(400).json({
+          ok: false,
+          message: "El producto no pudo ser actualizado",
+        });
+      }
+
+      res.json({
+        ok: true,
+        product: usuarioBD,
         img: nombreArchivo,
       });
     });
