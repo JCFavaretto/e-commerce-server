@@ -122,7 +122,7 @@ function imagenProducto(id, res, nombreArchivo) {
 
     producto.img = nombreArchivo;
 
-    producto.save((err, productoBD) => {
+    producto.save((err, productoDB) => {
       if (err) {
         return res.status(500).json({
           ok: false,
@@ -140,7 +140,7 @@ function imagenProducto(id, res, nombreArchivo) {
 
       res.json({
         ok: true,
-        product: usuarioBD,
+        product: productoDB,
         img: nombreArchivo,
       });
     });

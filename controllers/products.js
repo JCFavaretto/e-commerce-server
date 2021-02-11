@@ -1,7 +1,7 @@
 const Product = require("../models/products");
 
 function crearProducto(req, res) {
-  const { nombre, precio, descripcion, stock, categoria } = req.body;
+  const { nombre, precio, descripcion, stock, categoria, oferta } = req.body;
 
   if (!nombre || !precio || !descripcion || !stock || !categoria) {
     return res.status(400).json({
@@ -16,6 +16,7 @@ function crearProducto(req, res) {
     descripcion,
     stock,
     categoria,
+    oferta,
   });
 
   producto.save((err, productoDB) => {
