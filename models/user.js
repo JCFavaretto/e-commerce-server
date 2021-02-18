@@ -37,6 +37,32 @@ const UserSchema = Schema({
   avatar: {
     type: String,
     required: false,
+    default: null,
+  },
+  calle: {
+    type: String,
+    required: false,
+  },
+
+  altura: {
+    type: Number,
+    required: false,
+  },
+  depto: {
+    type: String,
+    required: false,
+  },
+  piso: {
+    type: String,
+    required: false,
+  },
+  telefono: {
+    type: String,
+    required: false,
+  },
+  orders: {
+    type: [Schema.Types.ObjectId],
+    required: false,
   },
 });
 

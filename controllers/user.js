@@ -186,8 +186,9 @@ function updateUsers(req, res) {
   const id = req.params.id;
   var user = req.body;
 
-  user.email = req.body.email.toLowerCase();
-
+  if (user.email) {
+    user.email = req.body.email.toLowerCase();
+  }
   if (user.password) {
     user.password = bcrypt.hashSync(user.password, 10);
   }

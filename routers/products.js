@@ -25,6 +25,16 @@ app.put(
 app.get("/obtener-productos", ProductController.obtenerProductos);
 
 app.get(
+  "/obtener-productos-categoria",
+  ProductController.obtenerProductosporCategoria
+);
+
+app.get(
+  "/obtener-productos-oferta",
+  ProductController.obtenerProductosEnOferta
+);
+
+app.get(
   "/obtener-todos-productos",
   [md_auth.ensureAuth, md_auth.ensureAdminRole],
   ProductController.obtenerTodosProductos
