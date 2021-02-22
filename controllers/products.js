@@ -155,32 +155,34 @@ function obtenerProductosporCategoria(req, res) {
 }
 
 function obtenerProductosEnOferta(req, res) {
-  Product.find({ stock: { $gt: 0 }, oferta: true }).exec((err, productosDB) => {
-    if (err) {
-      return res.status(500).json({
-        ok: false,
-        message: "Error en la base de datos. Intente mas tarde.",
-        err,
-      });
-    }
-    Product.countDocuments(
-      { stock: { $gt: 0 }, oferta: true },
-      (err, conteo) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            message: "Error en la base de datos. Intente mas tarde.",
-            err,
-          });
-        }
-        res.json({
-          ok: true,
-          conteo,
-          productos: productosDB,
+  Product.find({ active: true, stock: { $gt: 0 }, oferta: true }).exec(
+    (err, productosDB) => {
+      if (err) {
+        return res.status(500).json({
+          ok: false,
+          message: "Error en la base de datos. Intente mas tarde.",
+          err,
         });
       }
-    );
-  });
+      Product.countDocuments(
+        { stock: { $gt: 0 }, oferta: true },
+        (err, conteo) => {
+          if (err) {
+            return res.status(500).json({
+              ok: false,
+              message: "Error en la base de datos. Intente mas tarde.",
+              err,
+            });
+          }
+          res.json({
+            ok: true,
+            conteo,
+            productos: productosDB,
+          });
+        }
+      );
+    }
+  );
 }
 
 function obtenerTodosProductos(req, res) {
